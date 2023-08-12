@@ -51,4 +51,4 @@ On my system Ryzen 7 3700x ~4.2GHz 120gb DDR4 ram 3600mhz.
 * 1 Thread 553.909s
 * 4 Threads 518.253s
 * 8 Threads 516.122s
-* 
+  
