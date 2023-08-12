@@ -3,7 +3,10 @@ import java.util.Map;
 import java.awt.Color;
 import javax.swing.*;
 import java.util.Scanner;
-
+import java.awt.image.BufferedImage;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Main extends Thread{
  
@@ -84,44 +87,51 @@ public class Main extends Thread{
         return array_2d;
     }
 
+    static int[] user_inputs(){
+        
+        int[] all_user_inputs = new int[4];
 
-
-  public static void main(String[] args) {
-        int canvasWidth = 0;
-        int canvasHeight = 0;
-
-        int number_of_threads=0;
         System.out.println("What do you want the width to be? Must be a power of 2");
         Scanner dim_input= new Scanner(System.in);
         
         
-        canvasWidth=Integer.parseInt(dim_input.nextLine());
+        all_user_inputs[0]=Integer.parseInt(dim_input.nextLine());
 
         System.out.println("What do you want the height to be? Must be a power of 2");
 
-        canvasHeight=Integer.parseInt(dim_input.nextLine());
+        all_user_inputs[1]=Integer.parseInt(dim_input.nextLine());
 
         System.out.println("How many threads? must be a power of 2 less then or equal to number of threads");
-        number_of_threads=Integer.parseInt(dim_input.nextLine());
+        all_user_inputs[2]=Integer.parseInt(dim_input.nextLine());
  
+        System.out.println("How many iterations ?");
 
-        int number_of_iterations=500;
+        all_user_inputs[3]=Integer.parseInt(dim_input.nextLine());
         dim_input.close();
 
+        return all_user_inputs;
+    }
+
+
+
+  public static void main(String[] args) {
+        int[] user_inputs_array=user_inputs();
+        int canvasWidth = user_inputs_array[0];
+        int canvasHeight = user_inputs_array[1];
+        int number_of_threads=user_inputs_array[2];
+        int number_of_iterations=user_inputs_array[3];
+        
         //https://davidjohnstone.net/cubehelix-gradient-picker
         int[] colors={0x000000,0x87cdae,0x6cb5c0,0x6e8fd0,0x8563c4,0x9b3f95,0xe962c4f,
                       0x702911,0x372900,0xfad4c0};
 
         Map<Integer, Color> colorMap = generate_color_map(number_of_iterations,colors);
 
+        
 
-        JFrame frame = new JFrame("Pixel Canvas Example");
+        
         PixelCanvas pixelCanvas = new PixelCanvas(canvasWidth, canvasHeight);
-        frame.getContentPane().add(pixelCanvas);
-        frame.setSize(canvasWidth, canvasHeight);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-
+        
         double[] real_numbers_x= integer_to_real_range(0,canvasWidth,-2, 0.47);
         double[] real_numbers_y= integer_to_real_range(0, canvasHeight,-1.2,1.2);
       
@@ -149,31 +159,51 @@ public class Main extends Thread{
             }
         }
 
-        // for(int k=0;k<number_of_threads;k++){        
-        //     for(int i =0 ;i<canvasWidth;i++){
-        //         for(int j=0;j<canvasHeight;j++){
-            
-        //             System.out.println(iterations_threads[i][j][k]);
-        //         }
-        //     }
-        // }
         values=array_3d_to_2d(iterations_threads);
             long endTime=System.currentTimeMillis();
             System.out.println(("Time for threads "+(double)(endTime-startTime)/1000));
-        // System.out.println("HERE___________________________");
 
-        // for(int i=0;i<canvasWidth;i++){
-        //     for(int j=0 ; j<canvasHeight;j++){
-        //         System.out.println(values[i][j]);
-        //     }
-        // }
 
-        //turn the 3d array into a 2d array
+            long time_img_start =System.currentTimeMillis();
 
-        long time_img_start =System.currentTimeMillis();
+
+            SwingUtilities.invokeLater(() -> {
+                JFrame frame1 = new JFrame("Simple GUI Example");
+                frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame1.setSize(canvasWidth+100, canvasHeight+100);
+    
+            
+    
+                JButton button = new JButton("Take picture");
+                button.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                       pixelCanvas.saveCanvasAsImage("testingGui.png","PNG");;
+                    }
+                });
+
+                JButton zoomButton= new JButton("Zoom in box");
+                
+                zoomButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e){
+                        System.out.println("Top left pixel "+pixelCanvas.getSquareTopLeftX()+" , " +pixelCanvas.getSquareTopLeftY());
+                        System.out.println("Real range values x is "+real_numbers_x[pixelCanvas.getSquareTopLeftX()]+", " +real_numbers_x[pixelCanvas.getSquareTopLeftX()+pixelCanvas.getSquareSize()]);
+                    }
+                });
+
+                zoomButton.setBounds(canvasWidth,41,100,40);
+                frame1.add(zoomButton);
+                button.setBounds(canvasWidth,0, 100,40);
+                frame1.add(button);
+                // Add the panel to the frame
+                frame1.getContentPane().add(pixelCanvas);
+    
+                // Display the frame
+                frame1.setVisible(true);
+            });
+
         for(int i=0; i<canvasWidth;i++){
             for(int j=0;j<canvasHeight;j++){
-                pixelCanvas.drawPixel(i,j,colorMap.get(values[i][j]));
+                    pixelCanvas.drawPixel(i,j,colorMap.get(values[i][j]));
             }
         }
         pixelCanvas.repaint();
@@ -181,7 +211,7 @@ public class Main extends Thread{
         long time_img_end= System.currentTimeMillis();
 
     System.out.println(("Time for writing img "+(double)(time_img_end-time_img_start)/1000));
-    pixelCanvas.saveCanvasAsImage("canvas31221322.png", "PNG");
+   
 
   }
 }
