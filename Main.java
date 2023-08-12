@@ -73,16 +73,15 @@ public class Main extends Thread{
 
         int[][] array_2d= new int[array_3d.length*array_3d[0][0].length][array_3d[0].length*array_3d[0][0].length];
 
-        //This logic is so complicated bellow it is making my head hurt
-        for(int i=0;i<array_2d.length;i++){
-            int index_dim_3=0;
-            for(int j=0;j<array_2d[0].length;j++){
-                array_2d[i][j]=array_3d[ i % array_3d.length][j% array_3d[0].length][index_dim_3];
-                if (j % array_3d[0].length==0 && j!=0){
-                    index_dim_3+=1;
+        
+        for(int k=0;k< array_3d[0][0].length;k++){
+            for(int i=0;i<array_3d.length;i++){
+
+                for(int j=0;j<array_3d[0].length;j++){
+                array_2d[k*array_3d.length+i][k*array_3d[0].length +j]=array_3d[i][j][k];
                 }
             }
-        }
+        }    
         return array_2d;
     }
 
@@ -129,8 +128,8 @@ public class Main extends Thread{
       
         int[][] values=new int[canvasWidth][canvasHeight];
         
-        int ind_thread_range_width= canvasWidth/number_of_threads;
-        int ind_thread_range_height = canvasHeight/number_of_threads;
+        int ind_thread_range_width= (int)canvasWidth/number_of_threads;
+        int ind_thread_range_height =(int) canvasHeight/number_of_threads;
 
         
         Main[] threads_array= new Main[number_of_threads];
@@ -139,7 +138,7 @@ public class Main extends Thread{
             threads_array[i]= new Main();
         }
         
-        int[][][] iterations_threads= new int[canvasWidth][canvasHeight][number_of_threads];
+        int[][][] iterations_threads= new int[ind_thread_range_width][ind_thread_range_height][number_of_threads];
 
         for (int i = 0; i < number_of_threads; i++) {
             int[][] threadResult = threads_array[i].run(real_numbers_x, real_numbers_y, ind_thread_range_width, ind_thread_range_height, i, number_of_iterations);
@@ -151,23 +150,23 @@ public class Main extends Thread{
             }
         }
 
-        for(int k=0;k<number_of_threads;k++){        
-            for(int i =0 ;i<canvasWidth;i++){
-                for(int j=0;j<canvasHeight;j++){
+        // for(int k=0;k<number_of_threads;k++){        
+        //     for(int i =0 ;i<canvasWidth;i++){
+        //         for(int j=0;j<canvasHeight;j++){
             
-                    System.out.println(iterations_threads[i][j][k]);
-                }
-            }
-        }
+        //             System.out.println(iterations_threads[i][j][k]);
+        //         }
+        //     }
+        // }
         values=array_3d_to_2d(iterations_threads);
 
-        System.out.println("HERE___________________________");
+        // System.out.println("HERE___________________________");
 
-        for(int i=0;i<canvasWidth;i++){
-            for(int j=0 ; j<canvasHeight;j++){
-                System.out.println(values[i][j]);
-            }
-        }
+        // for(int i=0;i<canvasWidth;i++){
+        //     for(int j=0 ; j<canvasHeight;j++){
+        //         System.out.println(values[i][j]);
+        //     }
+        // }
 
         //turn the 3d array into a 2d array
 
