@@ -1,11 +1,12 @@
 import java.awt.*;
+import java.util.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.awt.Color;
 import javax.swing.*;
 import java.util.Scanner;
 
-public class Main {
+public class Main extends Thread{
  
     //function that will take a range of integers inclusive and convert them to a range of real numbers inclusive
     static double[] integer_to_real_range(int int_start,int int_end, double real_start,double real_end){
@@ -53,6 +54,37 @@ public class Main {
         return colorMap;
     } 
 
+    //function that will return a list that is the size of the region needed
+    public int[][] run(double[] real_range_x,double[] real_range_y, int region_x,int region_y,int thread_number,int iterations){
+        int[][] iterations_value=new int[region_x][region_y];
+
+        for(int i =0;i<region_x;i++){
+            for(int j=0;j<region_y;j++){
+                iterations_value[i][j] = complex_function(real_range_x[thread_number*region_x+i], real_range_y[thread_number*region_y+j], iterations);
+            }
+        }
+        return iterations_value;
+
+    }
+
+
+    //This function is wrong i need to figure out how to map it back
+    static int[][] array_3d_to_2d(int[][][] array_3d){
+
+        int[][] array_2d= new int[array_3d.length*array_3d[0][0].length][array_3d[0].length*array_3d[0][0].length];
+
+        //This logic is so complicated bellow it is making my head hurt
+        for(int i=0;i<array_2d.length;i++){
+            int index_dim_3=0;
+            for(int j=0;j<array_2d[0].length;j++){
+                array_2d[i][j]=array_3d[ i % array_3d.length][j% array_3d[0].length][index_dim_3];
+                if (j % array_3d[0].length==0 && j!=0){
+                    index_dim_3+=1;
+                }
+            }
+        }
+        return array_2d;
+    }
 
 
 
@@ -101,12 +133,48 @@ public class Main {
         int ind_thread_range_height = canvasHeight/number_of_threads;
 
         
+        Main[] threads_array= new Main[number_of_threads];
 
+        for(int i=0;i<number_of_threads;i++){
+            threads_array[i]= new Main();
+        }
+        
+        int[][][] iterations_threads= new int[canvasWidth][canvasHeight][number_of_threads];
+
+        for (int i = 0; i < number_of_threads; i++) {
+            int[][] threadResult = threads_array[i].run(real_numbers_x, real_numbers_y, ind_thread_range_width, ind_thread_range_height, i, number_of_iterations);
+            
+            for (int x = 0; x < ind_thread_range_width; x++) {
+                for (int y = 0; y < ind_thread_range_height; y++) {
+                    iterations_threads[x][y][i] = threadResult[x][y];
+                }
+            }
+        }
+
+        for(int k=0;k<number_of_threads;k++){        
+            for(int i =0 ;i<canvasWidth;i++){
+                for(int j=0;j<canvasHeight;j++){
+            
+                    System.out.println(iterations_threads[i][j][k]);
+                }
+            }
+        }
+        values=array_3d_to_2d(iterations_threads);
+
+        System.out.println("HERE___________________________");
+
+        for(int i=0;i<canvasWidth;i++){
+            for(int j=0 ; j<canvasHeight;j++){
+                System.out.println(values[i][j]);
+            }
+        }
+
+        //turn the 3d array into a 2d array
 
 
         for(int i=0; i<canvasWidth;i++){
             for(int j=0;j<canvasHeight;j++){
-                pixelCanvas.drawPixel(i,j,colorMap.get(complex_function(real_numbers_x[i],real_numbers_y[j],number_of_iterations )));
+                pixelCanvas.drawPixel(i,j,colorMap.get(values[i][j]));
             }
         }
         pixelCanvas.repaint();
