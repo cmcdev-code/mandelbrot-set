@@ -1,6 +1,6 @@
 # The Mandelbrot Fractal 
 
-![](https://github.com/cmcdev-code/../../../media/fractal100.gif)
+![](https://github.com/cmcdev-code/mandlebrot/blob/main/media/fractal100.gif)
 
 This code is written in java and will just produce an image of the mandelbrot fractal.
 
