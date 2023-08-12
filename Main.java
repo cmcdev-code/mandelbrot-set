@@ -140,32 +140,38 @@ public class Main extends Thread{
         int ind_thread_range_width= (int)canvasWidth/number_of_threads;
         int ind_thread_range_height = canvasHeight;
 
+        int[][][] iterations_threads= new int[ind_thread_range_width][ind_thread_range_height][number_of_threads]; 
+         long time_thread_start= System.currentTimeMillis();
+        FractalThread[] threads = new FractalThread[number_of_threads];
+        Thread[] threadObjects = new Thread[number_of_threads];
         
-        Main[] threads_array= new Main[number_of_threads];
-
-        for(int i=0;i<number_of_threads;i++){
-            threads_array[i]= new Main();
+        for (int i = 0; i < number_of_threads; i++) {
+            threads[i] = new FractalThread(real_numbers_x, real_numbers_y, ind_thread_range_width, ind_thread_range_height, i, number_of_iterations);
+            threadObjects[i] = new Thread(threads[i]);
+            threadObjects[i].start();
         }
         
-        int[][][] iterations_threads= new int[ind_thread_range_width][ind_thread_range_height][number_of_threads];
-        long startTime=System.currentTimeMillis();
         for (int i = 0; i < number_of_threads; i++) {
-            int[][] threadResult = threads_array[i].run(real_numbers_x, real_numbers_y, ind_thread_range_width, ind_thread_range_height, i, number_of_iterations);
+            try {
+                threadObjects[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
             
+            for(int i=0 ;i<number_of_threads;i++){
             for (int x = 0; x < ind_thread_range_width; x++) {
+                int[][] thread_result=threads[i].getResult();
                 for (int y = 0; y < ind_thread_range_height; y++) {
-                    iterations_threads[x][y][i] = threadResult[x][y];
+                    iterations_threads[x][y][i] = thread_result[x][y] ;
                 }
             }
         }
+        long time_thread_end= System.currentTimeMillis();
 
+        System.out.println("Thread time "+(double) (time_thread_end-time_thread_start)/1000);
         values=array_3d_to_2d(iterations_threads);
-            long endTime=System.currentTimeMillis();
-            System.out.println(("Time for threads "+(double)(endTime-startTime)/1000));
-
-
-            long time_img_start =System.currentTimeMillis();
-
+            
 
             SwingUtilities.invokeLater(() -> {
                 JFrame frame1 = new JFrame("Simple GUI Example");
@@ -208,9 +214,9 @@ public class Main extends Thread{
         }
         pixelCanvas.repaint();
 
-        long time_img_end= System.currentTimeMillis();
+      
 
-    System.out.println(("Time for writing img "+(double)(time_img_end-time_img_start)/1000));
+   
    
 
   }
