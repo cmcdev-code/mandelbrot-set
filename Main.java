@@ -1,10 +1,9 @@
-import java.awt.*;
-import java.util.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.awt.Color;
 import javax.swing.*;
 import java.util.Scanner;
+
 
 public class Main extends Thread{
  
@@ -47,7 +46,7 @@ public class Main extends Thread{
 
         for(int i =1 ;i<=number_of_iterations ;i++){
             colorMap.put(i-1,new Color(array_of_colors[index_for_switching_colors]));
-            index_for_switching_colors += ( i%delta_colors - 1>> 31) & 0x1;
+            index_for_switching_colors += ( i % delta_colors - 1>> 31) & 0x1;
         }
         colorMap.put(number_of_iterations,new Color(array_of_colors[index_for_switching_colors-1]));
 
@@ -60,7 +59,7 @@ public class Main extends Thread{
 
         for(int i =0;i<region_x;i++){
             for(int j=0;j<region_y;j++){
-                iterations_value[i][j] = complex_function(real_range_x[thread_number*region_x+i], real_range_y[thread_number*region_y+j], iterations);
+                iterations_value[i][j] = complex_function(real_range_x[thread_number*region_x+i], real_range_y[j], iterations);
             }
         }
         return iterations_value;
@@ -68,17 +67,17 @@ public class Main extends Thread{
     }
 
 
-    //This function is wrong i need to figure out how to map it back
+    //function that will take in a 3d array and convert it to 2d
     static int[][] array_3d_to_2d(int[][][] array_3d){
 
-        int[][] array_2d= new int[array_3d.length*array_3d[0][0].length][array_3d[0].length*array_3d[0][0].length];
+        int[][] array_2d= new int[array_3d.length*array_3d[0][0].length][array_3d[0].length];
 
         
         for(int k=0;k< array_3d[0][0].length;k++){
             for(int i=0;i<array_3d.length;i++){
 
                 for(int j=0;j<array_3d[0].length;j++){
-                array_2d[k*array_3d.length+i][k*array_3d[0].length +j]=array_3d[i][j][k];
+                array_2d[k*array_3d.length+i][j]=array_3d[i][j][k];
                 }
             }
         }    
@@ -92,19 +91,19 @@ public class Main extends Thread{
         int canvasHeight = 0;
 
         int number_of_threads=0;
-        System.out.println("What do you want the width to be?");
+        System.out.println("What do you want the width to be? Must be a power of 2");
         Scanner dim_input= new Scanner(System.in);
         
         
         canvasWidth=Integer.parseInt(dim_input.nextLine());
 
-        System.out.println("What do you want the height to be?");
+        System.out.println("What do you want the height to be? Must be a power of 2");
 
         canvasHeight=Integer.parseInt(dim_input.nextLine());
 
-        System.out.println("How many threads?");
+        System.out.println("How many threads? must be a power of 2 less then or equal to number of threads");
         number_of_threads=Integer.parseInt(dim_input.nextLine());
-
+ 
 
         int number_of_iterations=500;
         dim_input.close();
@@ -129,7 +128,7 @@ public class Main extends Thread{
         int[][] values=new int[canvasWidth][canvasHeight];
         
         int ind_thread_range_width= (int)canvasWidth/number_of_threads;
-        int ind_thread_range_height =(int) canvasHeight/number_of_threads;
+        int ind_thread_range_height = canvasHeight;
 
         
         Main[] threads_array= new Main[number_of_threads];
@@ -139,7 +138,7 @@ public class Main extends Thread{
         }
         
         int[][][] iterations_threads= new int[ind_thread_range_width][ind_thread_range_height][number_of_threads];
-
+        long startTime=System.currentTimeMillis();
         for (int i = 0; i < number_of_threads; i++) {
             int[][] threadResult = threads_array[i].run(real_numbers_x, real_numbers_y, ind_thread_range_width, ind_thread_range_height, i, number_of_iterations);
             
@@ -159,7 +158,8 @@ public class Main extends Thread{
         //     }
         // }
         values=array_3d_to_2d(iterations_threads);
-
+            long endTime=System.currentTimeMillis();
+            System.out.println(("Time for threads "+(double)(endTime-startTime)/1000));
         // System.out.println("HERE___________________________");
 
         // for(int i=0;i<canvasWidth;i++){
@@ -170,7 +170,7 @@ public class Main extends Thread{
 
         //turn the 3d array into a 2d array
 
-
+        long time_img_start =System.currentTimeMillis();
         for(int i=0; i<canvasWidth;i++){
             for(int j=0;j<canvasHeight;j++){
                 pixelCanvas.drawPixel(i,j,colorMap.get(values[i][j]));
@@ -178,7 +178,10 @@ public class Main extends Thread{
         }
         pixelCanvas.repaint();
 
-    pixelCanvas.saveCanvasAsImage("canvas321322.png", "PNG");
+        long time_img_end= System.currentTimeMillis();
+
+    System.out.println(("Time for writing img "+(double)(time_img_end-time_img_start)/1000));
+    pixelCanvas.saveCanvasAsImage("canvas31221322.png", "PNG");
 
   }
 }
