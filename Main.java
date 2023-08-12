@@ -6,25 +6,7 @@ import javax.swing.*;
 import java.util.Scanner;
 
 public class Main {
-        // Interpolate colors using smoothstep function
-        private static Color interpolateColors(Color startColor, Color endColor, double t) {
-            t = smoothstep(0, 1, t);
-            int r = (int) (startColor.getRed() * (1 - t) + endColor.getRed() * t);
-            int g = (int) (startColor.getGreen() * (1 - t) + endColor.getGreen() * t);
-            int b = (int) (startColor.getBlue() * (1 - t) + endColor.getBlue() * t);
-            return new Color(r, g, b);
-        }
-    
-        // Smoothstep function for smooth interpolation
-        private static double smoothstep(double edge0, double edge1, double x) {
-            x = clamp((x - edge0) / (edge1 - edge0), 0, 1);
-            return x * x * (3 - 2 * x);
-        }
-    
-        // Clamp function to restrict values within a range
-        private static double clamp(double value, double min, double max) {
-            return Math.max(min, Math.min(max, value));
-        }
+ 
     //function that will take a range of integers inclusive and convert them to a range of real numbers inclusive
     static double[] integer_to_real_range(int int_start,int int_end, double real_start,double real_end){
                                             
