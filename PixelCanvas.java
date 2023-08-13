@@ -148,4 +148,3 @@ public class PixelCanvas extends JPanel {
         }
     }
 }
-

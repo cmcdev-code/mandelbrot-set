@@ -158,7 +158,9 @@ public class Main extends Thread{
         
         //https://davidjohnstone.net/cubehelix-gradient-picker
         int[] colors={0x000000,0x87cdae,0x6cb5c0,0x6e8fd0,0x8563c4,0x9b3f95,0xe962c4f,
-                      0x702911,0x372900,0xfad4c0};
+                          0x702911,0x372900,0xfad4c0};
+        //int[] colors={0x2f2d5b,0x1b545b,0x2b6f38,0x6b6e29,0xaa6258,0xb66aa8,0x9390d5,371430,0x1d0b09,0x000000};
+
 
         Map<Integer, Color> colorMap = generate_color_map(number_of_iterations,colors);
 
@@ -170,12 +172,12 @@ public class Main extends Thread{
         PixelCanvas pixelCanvas = create_new_pixel_Canvas(canvasWidth, canvasHeight, colorMap, number_of_threads,real_numbers_x,real_numbers_y,number_of_iterations);
 
         
-        
+       
 
       
-        JFrame frame1 = new JFrame("Simple GUI Example");
+        JFrame frame1 = new JFrame("MandelBrot");
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame1.setSize(canvasWidth+100, canvasHeight+100);
+        frame1.setSize(canvasWidth+300, canvasHeight);
         JButton button = new JButton("Take picture");
         JButton zoomButton= new JButton("Zoom in box");
          zoomButton.setBounds(canvasWidth,41,100,40);
@@ -187,7 +189,51 @@ public class Main extends Thread{
     
                 // Display the frame
             frame1.setVisible(true);
-    
+            
+            JLabel high_D_width=new JLabel("High d photo width");
+            JTextField high_D_Width_number = new JTextField(10);
+           
+
+            high_D_width.setBounds(canvasWidth+20,81,100,20);
+            high_D_Width_number.setBounds(canvasWidth+200,101,100,30);
+        
+
+            JLabel high_D_length=new JLabel("High d photo length");
+            
+            JTextField high_D_length_number = new JTextField();
+
+            high_D_length.setBounds(canvasWidth,131,100,20);
+            high_D_length_number.setBounds(canvasWidth,151,100,30);
+
+            JLabel img_name_label= new JLabel("img name");
+
+            JTextField img_name_enter= new JTextField();
+
+            JLabel iterations_text_field= new JLabel("Depth");
+
+
+            JTextField iterations = new JTextField();
+            
+            
+            img_name_label.setBounds(canvasWidth,181,100,20);
+            img_name_enter.setBounds(canvasWidth,201,100,30);
+
+            iterations_text_field.setBounds(canvasWidth,231,100,20);
+            iterations.setBounds(canvasWidth,251,100,30);
+
+
+            frame1.add(high_D_width);
+            frame1.add(high_D_Width_number);
+            frame1.add(high_D_length);
+            frame1.add(high_D_length_number);
+            frame1.add(img_name_label);
+            frame1.add(img_name_enter);
+            frame1.add(iterations_text_field);
+            frame1.add(iterations);
+
+
+
+
         SwingUtilities.invokeLater(() -> {
             
            
@@ -196,7 +242,23 @@ public class Main extends Thread{
             
             button.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    pixelCanvas.saveCanvasAsImage("testingGui.png","PNG");;
+                    
+                    int highDefinitionPic_width=0;
+                    int highDefinitionPic_height=0;
+                    String img_name="";
+
+                    String width=high_D_Width_number.getText();
+                    String length= high_D_length_number.getText();
+
+                    double[] real_range_width= integer_to_real_range(0,30000, real_numbers_x[0], real_numbers_x[real_numbers_x.length-1]);
+                    double[] real_range_length= integer_to_real_range(0,30000, real_numbers_y[0], real_numbers_y[real_numbers_y.length-1]);
+
+                    PixelCanvas new_pixel=create_new_pixel_Canvas(30000,30000, colorMap, number_of_threads, real_range_width,real_range_length, 1000);
+
+                    new_pixel.saveCanvasAsImage("testinaddgHighD.png","PNG");
+
+
+                    
                 }
             });
 
