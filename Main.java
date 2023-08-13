@@ -166,14 +166,8 @@ public class Main extends Thread{
 
         double[] real_numbers_x= integer_to_real_range(0,canvasWidth,-2, 0.47);
         double[] real_numbers_y= integer_to_real_range(0, canvasHeight,-1.2,1.2);
-      
-
         
         PixelCanvas pixelCanvas = create_new_pixel_Canvas(canvasWidth, canvasHeight, colorMap, number_of_threads,real_numbers_x,real_numbers_y,number_of_iterations);
-
-        
-       
-
       
         JFrame frame1 = new JFrame("MandelBrot");
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -231,14 +225,7 @@ public class Main extends Thread{
             frame1.add(iterations_text_field);
             frame1.add(iterations);
 
-
-
-
         SwingUtilities.invokeLater(() -> {
-            
-           
-            
-    
             
             button.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -256,12 +243,9 @@ public class Main extends Thread{
                     PixelCanvas new_pixel=create_new_pixel_Canvas(30000,30000, colorMap, number_of_threads, real_range_width,real_range_length, 1000);
 
                     new_pixel.saveCanvasAsImage("testinaddgHighD.png","PNG");
-
-
                     
                 }
             });
-
             
             zoomButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
@@ -294,11 +278,6 @@ public class Main extends Thread{
             
            
             });
-
-      
-
-   
-   
 
   }
 }
