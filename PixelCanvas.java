@@ -94,7 +94,29 @@ public class PixelCanvas extends JPanel {
         return squareSize;
     }
 
+    public void setSquareTopLeftX(int selected_top_left_x){
+        this.squareTopLeftX=selected_top_left_x;
+    }
+    public void setSquareTopLeftY(int selected_top_left_y){
+        this.squareTopLeftY=selected_top_left_y;
+    }
+
+    public void setSquareSize(int square_size){
+        this.squareSize=square_size;
+    }
   
+    public BufferedImage getCanvasImage(){
+        return this.canvas;
+    }
+    public void copyCanvasContents(PixelCanvas sourceCanvas) {
+        BufferedImage sourceImage = sourceCanvas.getCanvasImage();
+        Graphics2D g = canvas.createGraphics();
+        g.drawImage(sourceImage, 0, 0, null);
+        g.dispose();
+        repaint();
+    }
+    
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);

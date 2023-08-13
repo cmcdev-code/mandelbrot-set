@@ -3,8 +3,6 @@ import java.util.Map;
 import java.awt.Color;
 import javax.swing.*;
 import java.util.Scanner;
-import java.awt.image.BufferedImage;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -25,6 +23,7 @@ public class Main extends Thread{
 
         return real_range_array;
     }
+
     //function that will mimic the mandelbrot equation and will return the number of iterations 
     static int complex_function(double x0, double y0, int max_iterations){
 
@@ -55,19 +54,6 @@ public class Main extends Thread{
 
         return colorMap;
     } 
-
-    //function that will return a list that is the size of the region needed
-    public int[][] run(double[] real_range_x,double[] real_range_y, int region_x,int region_y,int thread_number,int iterations){
-        int[][] iterations_value=new int[region_x][region_y];
-
-        for(int i =0;i<region_x;i++){
-            for(int j=0;j<region_y;j++){
-                iterations_value[i][j] = complex_function(real_range_x[thread_number*region_x+i], real_range_y[j], iterations);
-            }
-        }
-        return iterations_value;
-
-    }
 
 
     //function that will take in a 3d array and convert it to 2d
@@ -112,36 +98,16 @@ public class Main extends Thread{
         return all_user_inputs;
     }
 
+    static PixelCanvas create_new_pixel_Canvas(int canvasWidth,int canvasHeight,Map<Integer,Color> colorMap,int number_of_threads,double[] real_numbers_x,double[] real_numbers_y,int number_of_iterations){
+        PixelCanvas pixelCanvas=new PixelCanvas(canvasWidth,canvasHeight);
 
-
-  public static void main(String[] args) {
-        int[] user_inputs_array=user_inputs();
-        int canvasWidth = user_inputs_array[0];
-        int canvasHeight = user_inputs_array[1];
-        int number_of_threads=user_inputs_array[2];
-        int number_of_iterations=user_inputs_array[3];
-        
-        //https://davidjohnstone.net/cubehelix-gradient-picker
-        int[] colors={0x000000,0x87cdae,0x6cb5c0,0x6e8fd0,0x8563c4,0x9b3f95,0xe962c4f,
-                      0x702911,0x372900,0xfad4c0};
-
-        Map<Integer, Color> colorMap = generate_color_map(number_of_iterations,colors);
-
-        
-
-        
-        PixelCanvas pixelCanvas = new PixelCanvas(canvasWidth, canvasHeight);
-        
-        double[] real_numbers_x= integer_to_real_range(0,canvasWidth,-2, 0.47);
-        double[] real_numbers_y= integer_to_real_range(0, canvasHeight,-1.2,1.2);
-      
         int[][] values=new int[canvasWidth][canvasHeight];
         
         int ind_thread_range_width= (int)canvasWidth/number_of_threads;
         int ind_thread_range_height = canvasHeight;
 
         int[][][] iterations_threads= new int[ind_thread_range_width][ind_thread_range_height][number_of_threads]; 
-         long time_thread_start= System.currentTimeMillis();
+        long time_thread_start= System.currentTimeMillis();
         FractalThread[] threads = new FractalThread[number_of_threads];
         Thread[] threadObjects = new Thread[number_of_threads];
         
@@ -171,48 +137,101 @@ public class Main extends Thread{
 
         System.out.println("Thread time "+(double) (time_thread_end-time_thread_start)/1000);
         values=array_3d_to_2d(iterations_threads);
-            
-
-            SwingUtilities.invokeLater(() -> {
-                JFrame frame1 = new JFrame("Simple GUI Example");
-                frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame1.setSize(canvasWidth+100, canvasHeight+100);
-    
-            
-    
-                JButton button = new JButton("Take picture");
-                button.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                       pixelCanvas.saveCanvasAsImage("testingGui.png","PNG");;
-                    }
-                });
-
-                JButton zoomButton= new JButton("Zoom in box");
-                
-                zoomButton.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e){
-                        System.out.println("Top left pixel "+pixelCanvas.getSquareTopLeftX()+" , " +pixelCanvas.getSquareTopLeftY());
-                        System.out.println("Real range values x is "+real_numbers_x[pixelCanvas.getSquareTopLeftX()]+", " +real_numbers_x[pixelCanvas.getSquareTopLeftX()+pixelCanvas.getSquareSize()]);
-                    }
-                });
-
-                zoomButton.setBounds(canvasWidth,41,100,40);
-                frame1.add(zoomButton);
-                button.setBounds(canvasWidth,0, 100,40);
-                frame1.add(button);
-                // Add the panel to the frame
-                frame1.getContentPane().add(pixelCanvas);
-    
-                // Display the frame
-                frame1.setVisible(true);
-            });
-
+              
         for(int i=0; i<canvasWidth;i++){
             for(int j=0;j<canvasHeight;j++){
                     pixelCanvas.drawPixel(i,j,colorMap.get(values[i][j]));
             }
         }
         pixelCanvas.repaint();
+        
+        return pixelCanvas;
+    }
+
+
+  public static void main(String[] args) {
+        int[] user_inputs_array=user_inputs();
+        int canvasWidth = user_inputs_array[0];
+        int canvasHeight = user_inputs_array[1];
+        int number_of_threads=user_inputs_array[2];
+        int number_of_iterations=user_inputs_array[3];
+        
+        //https://davidjohnstone.net/cubehelix-gradient-picker
+        int[] colors={0x000000,0x87cdae,0x6cb5c0,0x6e8fd0,0x8563c4,0x9b3f95,0xe962c4f,
+                      0x702911,0x372900,0xfad4c0};
+
+        Map<Integer, Color> colorMap = generate_color_map(number_of_iterations,colors);
+
+        double[] real_numbers_x= integer_to_real_range(0,canvasWidth,-2, 0.47);
+        double[] real_numbers_y= integer_to_real_range(0, canvasHeight,-1.2,1.2);
+      
+
+        
+        PixelCanvas pixelCanvas = create_new_pixel_Canvas(canvasWidth, canvasHeight, colorMap, number_of_threads,real_numbers_x,real_numbers_y,number_of_iterations);
+
+        
+        
+
+      
+        JFrame frame1 = new JFrame("Simple GUI Example");
+        frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame1.setSize(canvasWidth+100, canvasHeight+100);
+        JButton button = new JButton("Take picture");
+        JButton zoomButton= new JButton("Zoom in box");
+         zoomButton.setBounds(canvasWidth,41,100,40);
+            frame1.add(zoomButton);
+            button.setBounds(canvasWidth,0, 100,40);
+            frame1.add(button);
+            // Add the panel to the frame
+            frame1.getContentPane().add(pixelCanvas);
+    
+                // Display the frame
+            frame1.setVisible(true);
+    
+        SwingUtilities.invokeLater(() -> {
+            
+           
+            
+    
+            
+            button.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    pixelCanvas.saveCanvasAsImage("testingGui.png","PNG");;
+                }
+            });
+
+            
+            zoomButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    int selectedTopLeftX = pixelCanvas.getSquareTopLeftX();
+                    int selectedTopLeftY = pixelCanvas.getSquareTopLeftY();
+                    int selectedSize = pixelCanvas.getSquareSize();
+
+                    System.out.println("Pixel top left "+selectedTopLeftX+" "+selectedTopLeftY);
+                    
+                    // Calculate updated real number ranges based on the selected square's coordinates
+                    double[] real_numbers_x_copy = integer_to_real_range(0, canvasWidth, real_numbers_x[selectedTopLeftX], real_numbers_x[selectedTopLeftX + selectedSize]);
+                    double[] real_numbers_y_copy = integer_to_real_range(0, canvasHeight, real_numbers_y[selectedTopLeftY], real_numbers_y[selectedTopLeftY + selectedSize]);
+            
+                    // Update the real number arrays with the new values
+                    System.arraycopy(real_numbers_x_copy, 0, real_numbers_x, 0, canvasWidth);
+                    System.arraycopy(real_numbers_y_copy, 0, real_numbers_y, 0, canvasHeight);
+            
+                    // Update the selected square's properties
+                    pixelCanvas.setSquareTopLeftX(selectedTopLeftX);
+                    pixelCanvas.setSquareTopLeftY(selectedTopLeftY);
+                    pixelCanvas.setSquareSize(selectedSize);
+                    
+                    
+                    pixelCanvas.copyCanvasContents(create_new_pixel_Canvas(canvasWidth, canvasHeight, colorMap, number_of_threads, real_numbers_x, real_numbers_y, number_of_iterations));
+
+                    // Refresh the display
+                    pixelCanvas.repaint();
+                }
+            });
+            
+           
+            });
 
       
 
