@@ -1,15 +1,13 @@
 public class FractalThread implements Runnable {
-    private double[] realNumbersX;
-    private double[] realNumbersY;
+    private Complex[][] complex_list;
     private int startX;
     private int startY;
     private int threadIndex;
     private int maxIterations;
     private int[][] result;
 
-    public FractalThread(double[] real_range_x,double[] real_range_y, int region_x,int region_y,int thread_number,int iterations) {
-        this.realNumbersX = real_range_x;
-        this.realNumbersY = real_range_y;
+    public FractalThread(Complex[][] complex_list, int region_x,int region_y,int thread_number,int iterations) {
+        this.complex_list= complex_list;
         this.startX = region_x;
         this.startY = region_y;
         this.threadIndex = thread_number;
@@ -30,6 +28,22 @@ public class FractalThread implements Runnable {
     }
     return iterations;
     }
+      //function that will mimic the mandelbrot equation and will return the number of iterations 
+      static int complex_function(Complex number,int max_iterations){
+
+        int iterations=0;
+        Complex Z=new Complex(0,0,number.scale);        
+        //https://en.wikipedia.org/wiki/Mandelbrot_set
+        for(;((Z.a)*(Z.a)+(Z.b)*(Z.b))*Z.scale <= 4.0 && iterations<max_iterations;iterations++ ){
+
+            Complex Ztemp = (Z.complex_multiplication(Z)).complex_addition(number);
+            Z.a=Ztemp.a;
+            Z.b=Ztemp.b;
+            Z.scale=Ztemp.scale;
+        }
+        return iterations;
+    }
+
 
     public int[][] getResult() {
         return result;
@@ -39,7 +53,7 @@ public class FractalThread implements Runnable {
     public void run() {
         for(int i =0;i<this.startX;i++){
             for(int j=0;j<this.startY;j++){
-                result[i][j] = complex_function(this.realNumbersX[this.threadIndex*startX+i],this.realNumbersY[j], this.maxIterations);
+                result[i][j] = complex_function(complex_list[this.threadIndex*startX+i][j], this.maxIterations);
             }
         }
     }

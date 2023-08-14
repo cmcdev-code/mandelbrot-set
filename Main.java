@@ -7,6 +7,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class Main extends Thread{
+
+    static Complex[][] integer_to_complex(int x_start,int x_end,int y_start,int y_end, double real_x_start,double real_x_end,double real_y_start,double real_y_end,int scale){
+        double[] real_x_list= integer_to_real_range(x_start, x_end, real_x_start, real_x_end);
+        double[] real_y_list= integer_to_real_range(y_start,y_end,real_y_start,real_y_end);
+        Complex[][] list_of_complex= new Complex[real_x_list.length][real_y_list.length];
+        for(int i =0;i<real_x_list.length;i++){
+            for(int j=0;j<real_y_list.length;j++){
+                list_of_complex[i][j]=new Complex(real_x_list[i],real_y_list[i],scale);
+            }
+        }
+        return list_of_complex;
+    }
  
     //function that will take a range of integers inclusive and convert them to a range of real numbers inclusive
     static double[] integer_to_real_range(int int_start,int int_end, double real_start,double real_end){
@@ -38,6 +50,19 @@ public class Main extends Thread{
         }
         return iterations;
     }
+    //function that will mimic the mandelbrot equation and will return the number of iterations 
+    static int complex_function(Complex number,int max_iterations){
+
+        int iterations=0;
+        Complex Z=new Complex(0,0,number.scale);        
+        //https://en.wikipedia.org/wiki/Mandelbrot_set
+        for(;((Z.a)*(Z.a)+(Z.b)*(Z.b))*Z.scale <= 4.0 && iterations<max_iterations;iterations++ ){
+            Z=(Z.complex_addition((Z))).complex_addition(number);
+        }
+        return iterations;
+    }
+
+
 
     //Function that will create a map of colors using the number of iterations the array of colors must divide number of iterations
     static Map<Integer,Color> generate_color_map(int number_of_iterations, int[] array_of_colors){
@@ -98,7 +123,56 @@ public class Main extends Thread{
         return all_user_inputs;
     }
 
-    static PixelCanvas create_new_pixel_Canvas(int canvasWidth,int canvasHeight,Map<Integer,Color> colorMap,int number_of_threads,double[] real_numbers_x,double[] real_numbers_y,int number_of_iterations){
+    // static PixelCanvas create_new_pixel_Canvas(int canvasWidth,int canvasHeight,Map<Integer,Color> colorMap,int number_of_threads,double[] real_numbers_x,double[] real_numbers_y,int number_of_iterations){
+    //     PixelCanvas pixelCanvas=new PixelCanvas(canvasWidth,canvasHeight);
+
+    //     int[][] values=new int[canvasWidth][canvasHeight];
+        
+    //     int ind_thread_range_width= (int)canvasWidth/number_of_threads;
+    //     int ind_thread_range_height = canvasHeight;
+
+    //     int[][][] iterations_threads= new int[ind_thread_range_width][ind_thread_range_height][number_of_threads]; 
+    //     long time_thread_start= System.currentTimeMillis();
+    //     FractalThread[] threads = new FractalThread[number_of_threads];
+    //     Thread[] threadObjects = new Thread[number_of_threads];
+        
+    //     for (int i = 0; i < number_of_threads; i++) {
+    //         threads[i] = new FractalThread(real_numbers_x, real_numbers_y, ind_thread_range_width, ind_thread_range_height, i, number_of_iterations);
+    //         threadObjects[i] = new Thread(threads[i]);
+    //         threadObjects[i].start();
+    //     }
+        
+    //     for (int i = 0; i < number_of_threads; i++) {
+    //         try {
+    //             threadObjects[i].join();
+    //         } catch (InterruptedException e) {
+    //             e.printStackTrace();
+    //         }
+    //     }
+            
+    //         for(int i=0 ;i<number_of_threads;i++){
+    //         for (int x = 0; x < ind_thread_range_width; x++) {
+    //             int[][] thread_result=threads[i].getResult();
+    //             for (int y = 0; y < ind_thread_range_height; y++) {
+    //                 iterations_threads[x][y][i] = thread_result[x][y] ;
+    //             }
+    //         }
+    //     }
+    //     long time_thread_end= System.currentTimeMillis();
+
+    //     System.out.println("Thread time "+(double) (time_thread_end-time_thread_start)/1000);
+    //     values=array_3d_to_2d(iterations_threads);
+              
+    //     for(int i=0; i<canvasWidth;i++){
+    //         for(int j=0;j<canvasHeight;j++){
+    //                 pixelCanvas.drawPixel(i,j,colorMap.get(values[i][j]));
+    //         }
+    //     }
+    //     pixelCanvas.repaint();
+        
+    //     return pixelCanvas;
+    // }
+      static PixelCanvas create_new_pixel_Canvas(int canvasWidth,int canvasHeight,Map<Integer,Color> colorMap,int number_of_threads,Complex[][] complex_list,int number_of_iterations){
         PixelCanvas pixelCanvas=new PixelCanvas(canvasWidth,canvasHeight);
 
         int[][] values=new int[canvasWidth][canvasHeight];
@@ -112,7 +186,7 @@ public class Main extends Thread{
         Thread[] threadObjects = new Thread[number_of_threads];
         
         for (int i = 0; i < number_of_threads; i++) {
-            threads[i] = new FractalThread(real_numbers_x, real_numbers_y, ind_thread_range_width, ind_thread_range_height, i, number_of_iterations);
+            threads[i] = new FractalThread(complex_list, ind_thread_range_width, ind_thread_range_height, i, number_of_iterations);
             threadObjects[i] = new Thread(threads[i]);
             threadObjects[i].start();
         }
@@ -149,6 +223,7 @@ public class Main extends Thread{
     }
 
 
+
   public static void main(String[] args) {
         int[] user_inputs_array=user_inputs();
         int canvasWidth = user_inputs_array[0];
@@ -166,15 +241,13 @@ public class Main extends Thread{
 
         double[] real_numbers_x= integer_to_real_range(0,canvasWidth,-2, 0.47);
         double[] real_numbers_y= integer_to_real_range(0, canvasHeight,-1.2,1.2);
-      
+        
+        Complex[][] complex_list= integer_to_complex(0,canvasWidth, 0,canvasHeight, -20, 4.7,-12, 12,-1);
+        
 
         
-        PixelCanvas pixelCanvas = create_new_pixel_Canvas(canvasWidth, canvasHeight, colorMap, number_of_threads,real_numbers_x,real_numbers_y,number_of_iterations);
+        PixelCanvas pixelCanvas = create_new_pixel_Canvas(canvasWidth, canvasHeight, colorMap, number_of_threads,complex_list,number_of_iterations);
 
-        
-       
-
-      
         JFrame frame1 = new JFrame("MandelBrot");
         frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame1.setSize(canvasWidth+300, canvasHeight);
@@ -189,75 +262,23 @@ public class Main extends Thread{
     
                 // Display the frame
             frame1.setVisible(true);
-            
-            JLabel high_D_width=new JLabel("High d photo width");
-            JTextField high_D_Width_number = new JTextField(10);
-           
-
-            high_D_width.setBounds(canvasWidth+20,81,100,20);
-            high_D_Width_number.setBounds(canvasWidth+200,101,100,30);
-        
-
-            JLabel high_D_length=new JLabel("High d photo length");
-            
-            JTextField high_D_length_number = new JTextField();
-
-            high_D_length.setBounds(canvasWidth,131,100,20);
-            high_D_length_number.setBounds(canvasWidth,151,100,30);
-
-            JLabel img_name_label= new JLabel("img name");
-
-            JTextField img_name_enter= new JTextField();
-
-            JLabel iterations_text_field= new JLabel("Depth");
-
-
-            JTextField iterations = new JTextField();
-            
-            
-            img_name_label.setBounds(canvasWidth,181,100,20);
-            img_name_enter.setBounds(canvasWidth,201,100,30);
-
-            iterations_text_field.setBounds(canvasWidth,231,100,20);
-            iterations.setBounds(canvasWidth,251,100,30);
-
-
-            frame1.add(high_D_width);
-            frame1.add(high_D_Width_number);
-            frame1.add(high_D_length);
-            frame1.add(high_D_length_number);
-            frame1.add(img_name_label);
-            frame1.add(img_name_enter);
-            frame1.add(iterations_text_field);
-            frame1.add(iterations);
 
 
 
 
         SwingUtilities.invokeLater(() -> {
             
-           
-            
-    
-            
             button.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     
-                    int highDefinitionPic_width=0;
-                    int highDefinitionPic_height=0;
-                    String img_name="";
+                    double[] real_range_width= integer_to_real_range(0,45000, real_numbers_x[0], real_numbers_x[real_numbers_x.length-1]);
+                    double[] real_range_length= integer_to_real_range(0,45000, real_numbers_y[0], real_numbers_y[real_numbers_y.length-1]);
 
-                    String width=high_D_Width_number.getText();
-                    String length= high_D_length_number.getText();
+                    Map<Integer,Color> new_color_map=generate_color_map(1000, colors);
 
-                    double[] real_range_width= integer_to_real_range(0,30000, real_numbers_x[0], real_numbers_x[real_numbers_x.length-1]);
-                    double[] real_range_length= integer_to_real_range(0,30000, real_numbers_y[0], real_numbers_y[real_numbers_y.length-1]);
+                  //  PixelCanvas new_pixel=create_new_pixel_Canvas(45000,45000, new_color_map, number_of_threads, real_range_width,real_range_length, 1000);
 
-                    PixelCanvas new_pixel=create_new_pixel_Canvas(30000,30000, colorMap, number_of_threads, real_range_width,real_range_length, 1000);
-
-                    new_pixel.saveCanvasAsImage("testinaddgHighD.png","PNG");
-
-
+                 //   new_pixel.saveCanvasAsImage("testinaddgHighD.png","PNG");
                     
                 }
             });
@@ -285,7 +306,7 @@ public class Main extends Thread{
                     pixelCanvas.setSquareSize(selectedSize);
                     
                     
-                    pixelCanvas.copyCanvasContents(create_new_pixel_Canvas(canvasWidth, canvasHeight, colorMap, number_of_threads, real_numbers_x, real_numbers_y, number_of_iterations));
+                  //  pixelCanvas.copyCanvasContents(create_new_pixel_Canvas(canvasWidth, canvasHeight, colorMap, number_of_threads, real_numbers_x, real_numbers_y, number_of_iterations));
 
                     // Refresh the display
                     pixelCanvas.repaint();
@@ -294,11 +315,5 @@ public class Main extends Thread{
             
            
             });
-
-      
-
-   
-   
-
   }
 }
